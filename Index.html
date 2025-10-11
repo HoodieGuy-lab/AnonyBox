@@ -1,55 +1,394 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AnonyBox</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>📝</text></svg>">
-<link rel="shortcut icon" href="favicon.ico">
-<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <style>
 :root {
-  --bg: #fef5e6;
-  --card: #fff9f0;
-  --accent: #ffb347;
-  --accent-dark: #ff8c00;
-  --muted: #555;
-  --shadow: rgba(0,0,0,0.15);
+  --bg: #e8f0fe;
+  --card: #ffffff;
+  --accent: #7c3aed;
+  --accent-dark: #6d28d9;
+  --text: #1e1b4b;
+  --muted: #64748b;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --border: #c7d2fe;
+  --gradient: linear-gradient(45deg, #dbeafe 0%, #f5f3ff 100%);
 }
-*{box-sizing:border-box;}
-body{margin:0;font-family:'Comic Neue', cursive; background:var(--bg); color:#333; padding:24px;}
-.wrap{max-width:800px; margin:0 auto; display:flex; flex-direction:column; gap:20px;}
-header{text-align:center; margin-bottom:24px;}
-h1{font-size:36px; margin-bottom:6px; color:var(--accent-dark); text-shadow:2px 2px #ffe0b2;}
-.subtitle{font-size:16px; color:var(--muted);}
-.app{display:flex; flex-direction:column; gap:20px;}
-.card{background:var(--card); border-radius:20px; padding:20px; box-shadow:6px 6px var(--shadow); border:2px solid #ffd699;}
-.composer textarea{width:100%; min-height:180px; padding:16px; border-radius:16px; border:2px dashed var(--accent); resize:vertical; font-size:16px; font-family:'Comic Neue', cursive; background:#fff8e1;}
-.btn{padding:10px 18px; border:none; border-radius:18px; cursor:pointer; font-weight:700; transition: all 0.2s; font-family:'Comic Neue', cursive;}
-.btn.accent{background:var(--accent-dark); color:#fff;}
-.btn.accent:hover{background:var(--accent);}
-.btn.ghost{background:transparent; border:2px dashed var(--accent); color:var(--accent-dark);}
-.btn.ghost:hover{background:var(--accent-light);}
-main{display:flex; flex-direction:column; gap:16px;}
-.feed{display:flex; flex-direction:column; gap:18px;}
-.post{background:#fff3e0; border-radius:18px; padding:18px; transition: all 0.3s; border:2px solid #ffd699; transform: rotate(0deg);}
-.post:hover{transform: rotate(-1deg) translateY(-2px);}
-.text{font-size:16px; line-height:1.5;}
-.meta{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:10px;}
-.actions{display:flex; gap:10px; margin-top:10px;}
-.like{padding:6px 12px; border-radius:14px; border:none; background:#ffe0b2; cursor:pointer; transition: all 0.2s;}
-.like.liked{background:var(--accent-dark); color:#fff; font-weight:700;}
+
+[data-theme="dark"] {
+  --bg: #1e1b4b;
+  --card: #2e2b5f;
+  --accent: #a78bfa;
+  --accent-dark: #7c3aed;
+  --text: #e0e7ff;
+  --muted: #94a3b8;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --border: #4b5e9e;
+  --gradient: linear-gradient(45deg, #2e2b5f 0%, #4b4b8b 100%);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--gradient);
+  color: var(--text);
+  padding: 48px;
+  min-height: 100vh;
+  line-height: 1.6;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+  z-index: -1;
+  opacity: 0.5;
+  animation: gradientShift 15s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.wrap {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+h1 {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  margin-bottom: 10px;
+  background: linear-gradient(to right, var(--accent-dark), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 48px;
+  right: 48px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--accent);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 6px 20px var(--shadow);
+  border: 2px solid var(--border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px var(--shadow);
+}
+
+.composer strong {
+  font-size: 18px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 14px;
+  color: var(--accent-dark);
+}
+
+.composer textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  resize: vertical;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  background: var(--card);
+  color: var(--text);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.composer textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.btn.accent {
+  background: var(--accent-dark);
+  color: #ffffff;
+}
+
+.btn.accent:hover {
+  background: var(--accent);
+  transform: scale(1.03);
+}
+
+.btn.ghost {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent-dark);
+}
+
+.btn.ghost:hover {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  border: 2px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.post:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px var(--shadow);
+}
+
+.text {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.like {
+  padding: 10px 18px;
+  border-radius: 24px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease, transform 0.2s ease;
+}
+
+.like:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.like.liked {
+  background: var(--accent-dark);
+  color: #ffffff;
+  border-color: var(--accent-dark);
+}
+
 .like:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
-select.sort{padding:6px 12px; border-radius:14px; border:2px dashed var(--accent); background:#fff8e1; color:#333; font-family:'Comic Neue', cursive;}
-#previewArea{margin-top:14px; display:none;}
-#previewArea .post{background:#fff0d9;}
-footer{text-align:center; margin-top:30px; color:var(--muted); font-size:14px;}
-.composer .controls{display:flex; justify-content:space-between; align-items:center; margin-top:12px; gap:10px; flex-wrap:wrap;}
-.composer .controls div{display:flex; gap:8px;}
+
+.like svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  transition: stroke 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+}
+
+.like.liked svg {
+  fill: currentColor;
+  animation: likeAnimation 0.4s ease-in-out;
+}
+
+@keyframes likeAnimation {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.share {
+  padding: 10px 18px;
+  border-radius: 24px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease, transform 0.2s ease;
+}
+
+.share:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: scale(1.05);
+}
+
+.share svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+select.sort, select.filter {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+select.sort:focus, select.filter:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+#previewArea {
+  margin-top: 18px;
+  display: none;
+}
+
+#previewArea .post {
+  background: var(--border);
+}
+
+footer {
+  text-align: center;
+  margin-top: 56px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.composer .controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.composer .controls div {
+  display: flex;
+  gap: 14px;
+}
+
+.RefreshNote {
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: -2px;
+}
 </style>
 </head>
 <body>
@@ -57,6 +396,7 @@ footer{text-align:center; margin-top:30px; color:var(--muted); font-size:14px;}
   <header>
     <h1>AnonyBox</h1>
     <div class="subtitle">Share secrets. Read others. Stay anonymous.</div>
+    <button class="theme-toggle" id="themeToggle">Dark</button>
   </header>
 
   <div class="app">
@@ -77,102 +417,122 @@ footer{text-align:center; margin-top:30px; color:var(--muted); font-size:14px;}
         </div>
       </div>
       <div id="previewArea">
-        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Preview</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Preview</div>
         <div class="post"><div class="text" id="previewText"></div></div>
       </div>
     </aside>
 
     <main>
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px; flex-wrap:wrap">
-        <select id="sortSelect" class="sort">
-          <option value="new">Newest</option>
-          <option value="hot">Hot</option>
-          <option value="random">Random</option>
-        </select>
+      <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:14px; flex-wrap:wrap">
+        <div style="display:flex; gap:14px; flex-wrap:wrap">
+          <select id="sortSelect" class="sort">
+            <option value="new">Newest</option>
+            <option value="hot">Hot</option>
+            <option value="random">Random</option>
+          </select>
+          <select id="filterSelect" class="filter">
+            <option value="all">All Tags</option>
+            <option value="General">General</option>
+            <option value="Crush">Crush</option>
+            <option value="Regret">Regret</option>
+            <option value="Funny">Funny</option>
+            <option value="Deep">Deep</option>
+          </select>
+        </div>
         <button class="btn ghost" id="refreshBtn">Refresh Feed</button>
       </div>
       <div id="feed" class="feed"></div>
     </main>
   </div>
-  <div class="RefreshNote" style="text-align:center; font-size:14px; color:var(--muted); margin-top:-10px;">
-    Refresh To see new confessions!
+  <div class="RefreshNote">
+    Refresh to see new confessions!
   </div>
 
   <footer>
-    Built with ❤️ — By NovaPixels<br/>
+    Built by NovaPixels<br/>
     copyright &copy; 2025
   </footer>
 </div>
 
 <script>
-// --- SETUP SUPABASE ---
-const supabaseUrl = 'https://stmwiuhdiukoopvmszjl.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0bXdpdWhkaXVrb29wdm1zempsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NjY2ODMsImV4cCI6MjA3NTM0MjY4M30.MNe3d5_O6pqliVxst_SlGmgrExBMLe6ewCVAmSHlwXo';
-const { createClient } = supabase;
-const supabaseClient = createClient(supabaseUrl, supabaseKey);
+  const supabaseUrl = 'https://xucmsjsvwxelxlshtwzb.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Y21zanN2d3hlbHhsc2h0d3piIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxOTQxMjMsImV4cCI6MjA3NTc3MDEyM30.HHD5XatgAnTqYN9GkmHCHvow2NLlCMZ9hm7jKxp3wUs';
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// --- Elements ---
-const bioInput = document.getElementById('bioInput');
-const tagSelect = document.getElementById('tagSelect');
-const postBtn = document.getElementById('postBtn');
-const previewBtn = document.getElementById('previewBtn');
-const previewArea = document.getElementById('previewArea');
-const previewText = document.getElementById('previewText');
-const feed = document.getElementById('feed');
-const sortSelect = document.getElementById('sortSelect');
-const refreshBtn = document.getElementById('refreshBtn');
+  document.addEventListener('DOMContentLoaded', () => {
+    const bioInput = document.getElementById('bioInput');
+    const tagSelect = document.getElementById('tagSelect');
+    const postBtn = document.getElementById('postBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const previewArea = document.getElementById('previewArea');
+    const previewText = document.getElementById('previewText');
+    const feed = document.getElementById('feed');
+    const sortSelect = document.getElementById('sortSelect');
+    const filterSelect = document.getElementById('filterSelect');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const themeToggle = document.getElementById('themeToggle');
 
-// --- Preview ---
-previewBtn.addEventListener('click', () => {
-    const text = bioInput.value.trim();
-    if(!text) return alert('Write something first!');
-    previewText.textContent = text;
-    previewArea.style.display = 'block';
-});
+    // Theme toggle
+    const setTheme = (theme) => {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      themeToggle.textContent = theme === 'dark' ? 'Light' : 'Dark';
+    };
 
-// --- Post confession ---
-postBtn.addEventListener('click', async () => {
-    const text = bioInput.value.trim();
-    if(!text) return alert('Write something first!');
-    
-    try {
-        const { error } = await supabaseClient.from('confessions').insert([{ 
-            text, 
-            tag: tagSelect.value, 
-            likes: 0 
-        }]);
-        
+    // Load saved theme or default to light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    });
+
+    const sanitize = text => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    };
+    const hasLiked = id => JSON.parse(localStorage.getItem('likedPosts') || '[]').includes(id);
+    const saveLike = id => {
+      const liked = JSON.parse(localStorage.getItem('likedPosts') || '[]');
+      liked.push(id);
+      localStorage.setItem('likedPosts', JSON.stringify(liked));
+    };
+
+    previewBtn.addEventListener('click', () => {
+      const val = bioInput.value.trim();
+      if (!val) return alert('Write something first!');
+      previewText.innerHTML = sanitize(val);
+      previewArea.style.display = 'block';
+    });
+
+    postBtn.addEventListener('click', async () => {
+      const text = bioInput.value.trim();
+      if (!text) return alert('Write something first!');
+      try {
+        const { error } = await supabase.from('confessions').insert([{ text, tag: tagSelect.value, likes: 0 }]);
         if (error) throw error;
-        
         bioInput.value = '';
         previewArea.style.display = 'none';
-        await renderFeed();
-    } catch (err) {
+        renderFeed();
+      } catch (err) {
         alert('Failed to post confession: ' + err.message);
-    }
-});
+      }
+    });
 
-function sanitizeText(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function hasLikedPost(postId) {
-    const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '[]');
-    return likedPosts.includes(postId);
-}
-
-// --- Render feed ---
-async function renderFeed() {
-    try {
-        const { data: posts, error } = await supabaseClient.from('confessions').select('*');
-        
+    const renderFeed = async () => {
+      try {
+        let query = supabase.from('confessions').select('*');
+        if (filterSelect.value !== 'all') {
+          query = query.eq('tag', filterSelect.value);
+        }
+        const { data: posts, error } = await query;
         if (error) throw error;
-        
         if (!posts || posts.length === 0) {
-            feed.innerHTML = '<div class="card">No confessions yet. Be the first to share!</div>';
-            return;
+          feed.innerHTML = '<div class="card">No confessions yet. Be the first to share!</div>';
+          return;
         }
 
         if (sortSelect.value === 'new') posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -180,84 +540,75 @@ async function renderFeed() {
         else if (sortSelect.value === 'random') posts.sort(() => Math.random() - 0.5);
 
         feed.innerHTML = '';
-        posts.forEach(post => {
-            const isLiked = hasLikedPost(post.id);
-            const div = document.createElement('div');
-            div.className = 'post';
-            div.innerHTML = `
-                <div class="meta">
-                    <span>${post.tag || 'General'}</span>
-                    <span>${new Date(post.created_at).toLocaleString()}</span>
-                </div>
-                <div class="text">${sanitizeText(post.text)}</div>
-                <div class="actions">
-                    <button class="like ${isLiked ? 'liked' : ''}" 
-                            data-id="${post.id}" 
-                            ${isLiked ? 'disabled' : ''}>
-                        ❤️ ${post.likes || 0}
-                    </button>
-                </div>
-            `;
-            feed.appendChild(div);
+        posts.forEach(p => {
+          const liked = hasLiked(p.id);
+          const div = document.createElement('div');
+          div.className = 'post';
+          div.innerHTML = `
+            <div class="meta">
+              <span>${p.tag || 'General'}</span>
+              <span>${p.created_at ? new Date(p.created_at).toLocaleString() : ''}</span>
+            </div>
+            <div class="text">${sanitize(p.text)}</div>
+            <div class="actions">
+              <button class="like ${liked ? 'liked' : ''}" data-id="${p.id}" ${liked ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                ${p.likes || 0}
+              </button>
+              <button class="share" data-text="${encodeURIComponent(p.text)}" data-tag="${p.tag || 'General'}">
+                <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+                Share
+              </button>
+            </div>
+          `;
+          feed.appendChild(div);
         });
-    } catch (err) {
-        console.error('Failed to load feed:', err);
-        feed.innerHTML = '<div class="card">Failed to load confessions. Please try again later.</div>';
-    }
-}
+      } catch (err) {
+        feed.innerHTML = '<div class="card">Failed to load confessions.</div>';
+        console.error(err);
+      }
+    };
 
-// --- Like functionality ---
-feed.addEventListener('click', async e => {
-    if (e.target.classList.contains('like') && !e.target.classList.contains('liked')) {
+    feed.addEventListener('click', async e => {
+      if (e.target.classList.contains('like') && !e.target.classList.contains('liked')) {
+        const id = e.target.dataset.id;
+        if (hasLiked(id)) return;
         try {
-            const id = e.target.dataset.id;
-            
-            // Check if already liked
-            if (hasLikedPost(id)) {
-                alert('You have already liked this confession!');
-                return;
-            }
-
-            const { data: post, error: selectError } = await supabaseClient
-                .from('confessions')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (selectError) throw selectError;
-            
-            const { error: updateError } = await supabaseClient
-                .from('confessions')
-                .update({ likes: (post.likes || 0) + 1 })
-                .eq('id', id);
-
-            if (updateError) throw updateError;
-            
-            // Store the liked post ID in localStorage
-            const likedPosts = JSON.parse(localStorage.getItem('likedPosts') || '[]');
-            likedPosts.push(id);
-            localStorage.setItem('likedPosts', JSON.stringify(likedPosts));
-            
-            // Update UI
-            e.target.classList.add('liked');
-            e.target.disabled = true;
-            
-            await renderFeed();
+          const { data, error } = await supabase.from('confessions').select('likes').eq('id', id).single();
+          if (error) throw error;
+          const { error: upd } = await supabase.from('confessions').update({ likes: (data.likes || 0) + 1 }).eq('id', id);
+          if (upd) throw upd;
+          saveLike(id);
+          renderFeed();
         } catch (err) {
-            console.error('Failed to update likes:', err);
-            alert('Failed to like the confession. Please try again.');
+          alert('Failed to like confession: ' + err.message);
         }
-    }
-});
+      }
+      if (e.target.classList.contains('share')) {
+        const text = decodeURIComponent(e.target.dataset.text);
+        const tag = e.target.dataset.tag;
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `AnonyBox Confession (${tag})`,
+              text: text,
+              url: window.location.href
+            });
+          } catch (err) {
+            alert('Failed to share: ' + err.message);
+          }
+        } else {
+          alert('Sharing is not supported on this device. Copy the text to share!');
+        }
+      }
+    });
 
-// --- Sorting / Refresh ---
-sortSelect.addEventListener('change', renderFeed);
-refreshBtn.addEventListener('click', renderFeed);
+    sortSelect.addEventListener('change', renderFeed);
+    filterSelect.addEventListener('change', renderFeed);
+    refreshBtn.addEventListener('click', renderFeed);
 
-// --- Initial load ---
-renderFeed();
+    renderFeed();
+  });
 </script>
 </body>
 </html>
-
-
