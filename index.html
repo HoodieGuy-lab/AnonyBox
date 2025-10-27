@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AnonyBox – Premium Posts (PayPal Real)</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>📝</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<title>AnonyBox – $1.99 Premium</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>Star</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <style>
 :root {
@@ -19,6 +19,7 @@
   --border: #c7d2fe;
   --gradient: linear-gradient(45deg, #dbeafe 0%, #f5f3ff 100%);
   --premium-gold: #ffd700;
+  --premium-glow: #ff6b6b;
 }
 [data-theme="dark"] {
   --bg: #1e1b4b;
@@ -69,7 +70,7 @@ h1 {
   border-radius: 12px; padding: 10px 20px;
   font-size: 15px; font-weight: 600;
   cursor: pointer; color: var(--text);
-  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
   z-index: 20;
 }
 .theme-toggle:hover {
@@ -113,7 +114,7 @@ h1 {
 .btn.ghost { background: transparent; border: 2px solid var(--accent); color: var(--accent-dark); }
 .btn.ghost:hover { background: var(--accent); color: #ffffff; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn.premium { background: var(--premium-gold); color: #000; border: none; }
+.btn.premium { background: var(--premium-gold); color: #000; border: none; font-weight: 700; }
 .btn.premium:hover { background: #e6c200; }
 
 main { display: flex; flex-direction: column; gap: 28px; }
@@ -126,18 +127,19 @@ main { display: flex; flex-direction: column; gap: 28px; }
   transition: all 0.3s ease;
 }
 .post:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow); }
+
+/* PREMIUM STYLES - ONLY IF is_premium = true */
 .post.premium {
-  border-color: var(--premium-gold);
-  background: linear-gradient(135deg, var(--card) 0%, #fff9c4 100%);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  border: 3px solid var(--premium-gold);
+  background: linear-gradient(135deg, #fffbe6 0%, #fef3c7 100%);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  animation: premiumPulse 3s infinite;
 }
-.post.premium .text { 
-  font-weight: bold; 
-  color: var(--premium-gold); 
-}
+@keyframes premiumPulse { 0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); } 50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); } }
 .post.premium::before {
-  content: '⭐ PREMIUM'; font-size: 12px; font-weight: 700; color: var(--premium-gold);
-  position: absolute; top: -8px; left: 16px; background: var(--card); padding: 2px 8px; border-radius: 8px;
+  content: 'PREMIUM'; font-size: 11px; font-weight: 700; color: #b45309;
+  position: absolute; top: -10px; left: 16px; background: #fffbe6; padding: 2px 10px; border-radius: 20px;
+  border: 1px solid var(--premium-gold);
 }
 
 .text { font-size: 15px; line-height: 1.7; word-wrap: break-word; }
@@ -200,18 +202,40 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+/* PREMIUM PANEL */
+.premium-panel {
+  background: linear-gradient(135deg, #fffbe6, #fef3c7);
+  border: 2px solid var(--premium-gold);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+.premium-panel h3 {
+  color: #b45309; margin-bottom: 12px; font-size: 18px;
+}
+.premium-options {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.premium-option {
+  display: flex; align-items: center; gap: 8px; font-size: 14px;
+}
+.premium-option input[type="color"] { width: 36px; height: 36px; border: none; border-radius: 50%; cursor: pointer; }
+.premium-option input[type="range"] { width: 100%; }
+.premium-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-left: 8px;
+}
+
 /* Modals */
 .modal {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
-  display: none; justify-content: center; align-items: center; z-index: 100;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);
+  display: none; justify-content: center; align-items: center; z-index: 1000;
 }
 .modal-content {
-  background: var(--card); border-radius: 16px; padding: 28px; max-width: 400px; width: 90%;
-  box-shadow: 0 10px 30px var(--shadow);
+  background: var(--card); border-radius: 16px; padding: 28px; max-width: 420px; width: 90%;
+  box-shadow: 0 10px 30px var(--shadow); border: 2px solid var(--premium-gold);
 }
-#customizeForm { display: flex; flex-direction: column; gap: 12px; }
-.custom-option { display: flex; align-items: center; gap: 8px; }
-.custom-option input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 50%; }
+#premiumForm { display: flex; flex-direction: column; gap: 14px; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -224,17 +248,7 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
   select.sort, select.filter { width: 48%; min-width: auto; }
   .composer .controls { flex-direction: column; align-items: stretch; }
   .composer .controls > div { width: 100%; justify-content: space-between; }
-}
-
-@media (max-width: 480px) {
-  body { padding: 16px; }
-  h1 { font-size: 28px; }
-  .subtitle { font-size: 14px; }
-  .card { padding: 20px; }
-  select.sort, select.filter { width: 100%; }
-  .btn { width: 100%; }
-  .actions { flex-direction: column; }
-  .like, .share { width: 100%; justify-content: center; }
+  .premium-options { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -262,16 +276,11 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
         <div>
           <button class="btn ghost" id="previewBtn">Preview</button>
           <button class="btn accent" id="postBtn">Post</button>
-          <!-- PASTE YOUR PAYPAL FORM HERE (replace this comment + div) -->
-          <div class="paypal-premium">
-            <form target="_top" action="https://www.paypal.com/cgi-bin/webscr" method="post" id="paypalForm">
-              <input type="hidden" name="cmd" value="_s-xclick">
-              <input type="hidden" name="hosted_button_id" value="3295MP8VSHQCU">  <!-- Replace with your ID -->
-              <input type="hidden" name="on0" value="Premium Post Unlock">  <!-- Optional: Customize -->
-              <input type="submit" class="btn premium" value="$1.99 Premium Post (PayPal)">
-            </form>
-          </div>
-          <!-- END PASTE -->
+
+          <!-- $1.99 PREMIUM BUTTON -->
+          <button class="btn premium" id="premiumBtn">
+            $1.99 Premium Post
+          </button>
         </div>
       </div>
       <div id="previewArea">
@@ -307,23 +316,49 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
   <footer>Built by NovaPixels<br/>copyright &copy; 2025</footer>
 </div>
 
-<!-- Customize Modal (Opens after PayPal redirect) -->
-<div class="modal" id="customizeModal">
+<!-- PREMIUM PANEL MODAL -->
+<div class="modal" id="premiumModal">
   <div class="modal-content">
-    <h3 style="margin-bottom:16px;">Customize Your Premium Post</h3>
-    <form id="customizeForm">
-      <label class="custom-option">
-        <input type="checkbox" name="bold" value="true"> Bold Text
-      </label>
-      <label class="custom-option">
-        <input type="color" name="color" value="#ffd700"> Text Color
-      </label>
-      <label class="custom-option">
-        <input type="checkbox" name="badge" value="⭐"> Add Badge
-      </label>
-      <button type="submit" class="btn accent" id="applyCustom">Apply & Post</button>
+    <h3 style="margin-bottom:16px; color: #b45309;">Premium Customization Panel</h3>
+    <p style="font-size:14px; color:green; margin-bottom:12px;">Payment successful! Customize your post.</p>
+    <form id="premiumForm">
+      <div class="premium-options">
+        <div class="premium-option">
+          <input type="checkbox" name="bold" value="true"> <strong>Bold</strong>
+        </div>
+        <div class="premium-option">
+          <input type="checkbox" name="italic" value="true"> <em>Italic</em>
+        </div>
+        <div class="premium-option">
+          <input type="checkbox" name="underline" value="true"> <u>Underline</u>
+        </div>
+        <div class="premium-option">
+          <input type="checkbox" name="glow" value="true"> Glow Effect
+        </div>
+        <div class="premium-option">
+          <label>Text Color: <input type="color" name="color" value="#b45309"></label>
+        </div>
+        <div class="premium-option">
+          <label>BG Color: <input type="color" name="bg" value="#fffbe6"></label>
+        </div>
+        <div class="premium-option">
+          <label>Font Size: <input type="range" name="size" min="12" max="24" value="16"></label>
+        </div>
+        <div class="premium-option">
+          <label>Badge: 
+            <select name="badge">
+              <option value="">None</option>
+              <option value="Fire">Fire</option>
+              <option value="Star">Star</option>
+              <option value="Crown">Crown</option>
+              <option value="Diamond">Diamond</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button type="submit" class="btn accent" style="margin-top:16px;">Apply & Post Premium</button>
     </form>
-    <button class="btn ghost" id="skipCustom" style="margin-top:8px;">Post Without Custom</button>
+    <button class="btn ghost" id="skipPremium" style="margin-top:8px;">Post Basic</button>
   </div>
 </div>
 
@@ -332,12 +367,11 @@ const supabaseUrl = 'https://ylpdsyyrleebptmxgrhl.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGRzeXlybGVlYnB0bXhncmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyNzYwMDMsImV4cCI6MjA3NTg1MjAwM30.EwUbLO3XGwxWBkJKZCNjtTF6IFRyH4hhqU4lJvLLsn8';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-let isPremiumPost = false;
+let canPostPremium = false;
 let customizations = {};
 
 document.addEventListener('DOMContentLoaded', () => {
   const bioInput = document.getElementById('bioInput');
-  const tagSelect = document.getElementById('tagSelect');
   const postBtn = document.getElementById('postBtn');
   const previewBtn = document.getElementById('previewBtn');
   const previewArea = document.getElementById('previewArea');
@@ -348,26 +382,46 @@ document.addEventListener('DOMContentLoaded', () => {
   const refreshBtn = document.getElementById('refreshBtn');
   const themeToggle = document.getElementById('themeToggle');
   const charCount = document.getElementById('charCount');
-  const paypalForm = document.getElementById('paypalForm');
-  const customizeModal = document.getElementById('customizeModal');
-  const customizeForm = document.getElementById('customizeForm');
-  const applyCustom = document.getElementById('applyCustom');
-  const skipCustom = document.getElementById('skipCustom');
+  const premiumModal = document.getElementById('premiumModal');
+  const premiumForm = document.getElementById('premiumForm');
+  const skipPremium = document.getElementById('skipPremium');
+  const premiumBtn = document.getElementById('premiumBtn');
 
-  // Check for PayPal redirect
+  // CHECK PAYMENT
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('premium') === 'unlocked') {
-    localStorage.setItem('hasPaidPremium', 'true');
-    isPremiumPost = true;
-    customizeModal.style.display = 'flex';
-    history.replaceState(null, null, window.location.pathname);  // Clean URL
-    alert('Payment successful! Customize your premium post.');
+  if (urlParams.get('payment') === 'success') {
+    canPostPremium = true;
+    localStorage.setItem('premiumPaid', 'true');
+    premiumModal.style.display = 'flex';
+    history.replaceState(null, null, window.location.pathname);
   }
 
-  // Premium unlocked check
-  if (localStorage.getItem('hasPaidPremium') === 'true') {
-    isPremiumPost = true;  // Allow premium posts in this session
+  if (localStorage.getItem('premiumPaid') === 'true') {
+    canPostPremium = true;
   }
+
+  // PAYPAL.ME POPUP
+  premiumBtn.addEventListener('click', () => {
+    if (canPostPremium) {
+      premiumModal.style.display = 'flex';
+      return;
+    }
+    const popup = window.open(
+      'https://paypal.me/NovaPixelDev/1.99?return_url=' + encodeURIComponent(location.href + '?payment=success'),
+      'paypal',
+      'width=500,height=600,scrollbars=yes,resizable=yes'
+    );
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
+        setTimeout(() => {
+          if (localStorage.getItem('premiumPaid') === 'true') {
+            premiumModal.style.display = 'flex';
+          }
+        }, 2000);
+      }
+    }, 1000);
+  });
 
   // Theme
   const setTheme = (theme) => {
@@ -410,27 +464,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // PayPal Button (opens in new tab if needed)
-  paypalForm.addEventListener('submit', (e) => {
-    e.preventDefault();  // Optional: Open in new tab for better UX
-    window.open(paypalForm.action, '_blank');
-    paypalForm.submit();  // Submit original
-  });
-
-  customizeForm.addEventListener('submit', (e) => {
+  premiumForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const formData = new FormData(customizeForm);
+    const formData = new FormData(premiumForm);
     customizations = Object.fromEntries(formData);
-    customizeModal.style.display = 'none';
-    postConfession();
+    premiumModal.style.display = 'none';
+    postConfession(true); // isPremium = true
   });
 
-  skipCustom.addEventListener('click', () => {
-    customizeModal.style.display = 'none';
-    postConfession();
+  skipPremium.addEventListener('click', () => {
+    premiumModal.style.display = 'none';
+    postConfession(false); // isPremium = false
   });
 
-  // Preview
   previewBtn.addEventListener('click', () => {
     const val = bioInput.value.trim();
     if (!val) return alert('Write something first!');
@@ -438,30 +484,29 @@ document.addEventListener('DOMContentLoaded', () => {
     previewArea.style.display = 'block';
   });
 
-  // Post Function (handles premium)
-  async function postConfession() {
+  // POST FUNCTION - NOW ACCEPTS isPremium
+  async function postConfession(isPremium = false) {
     const text = bioInput.value.trim();
     if (!text) return alert('Write something first!');
-    if (isPremiumPost && localStorage.getItem('hasPaidPremium') !== 'true') {
-      alert('Premium requires payment first!');
-      return;
-    }
+    if (isPremium && !canPostPremium) return alert('Pay $1.99 first!');
     try {
       postBtn.disabled = true;
       postBtn.innerHTML = '<div class="loader"></div>';
-      const insertData = { text, tag: tagSelect.value };
-      if (isPremiumPost) {
-        insertData.is_premium = true;
-        insertData.customization = customizations;
-      }
+      const insertData = { 
+        text, 
+        tag: document.getElementById('tagSelect').value, 
+        is_premium: isPremium,
+        customization: isPremium ? customizations : null
+      };
       const { error } = await supabase.from('confessions').insert([insertData]);
       if (error) throw error;
-      const { data: newPost } = await supabase.from('confessions').select('id').eq('text', text).single();
-      await supabase.from('audit_logs').insert({ action: 'post', confession_id: newPost.id, user_id: getAnonUserId() });
       bioInput.value = '';
       charCount.textContent = '0/800';
       previewArea.style.display = 'none';
-      customizations = {};
+      if (isPremium) {
+        canPostPremium = false;
+        localStorage.removeItem('premiumPaid');
+      }
       await renderFeed();
     } catch (err) {
       alert('Failed to post: ' + err.message);
@@ -471,9 +516,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  postBtn.addEventListener('click', postConfession);
+  postBtn.addEventListener('click', () => postConfession(false)); // Free post
 
-  // Render Feed (with premium styling)
   async function renderFeed() {
     try {
       feed.innerHTML = '<div class="card"><div class="loader"></div></div>';
@@ -488,15 +532,31 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sortSelect.value === 'new') posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       else if (sortSelect.value === 'hot') posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
       else if (sortSelect.value === 'random') posts.sort(() => Math.random() - 0.5);
+
       feed.innerHTML = posts.map(p => {
         const premiumClass = p.is_premium ? 'premium' : '';
-        const textStyle = p.is_premium && p.customization?.bold ? `font-weight: bold; color: ${p.customization?.color || 'var(--premium-gold)'};` : '';
-        const badge = p.is_premium && p.customization?.badge ? `<div style="position: absolute; top: 8px; right: 8px; font-size: 20px;">${p.customization.badge}</div>` : '';
+        let textStyle = '';
+        let badge = '';
+        let bgStyle = '';
+
+        if (p.is_premium && p.customization) {
+          const c = p.customization;
+          textStyle = `
+            ${c.bold ? 'font-weight: bold;' : ''}
+            ${c.italic ? 'font-style: italic;' : ''}
+            ${c.underline ? 'text-decoration: underline;' : ''}
+            color: ${c.color || '#b45309'};
+            font-size: ${c.size || 16}px;
+            ${c.glow ? 'text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);' : ''}
+          `;
+          bgStyle = c.bg ? `background: ${c.bg};` : '';
+          badge = c.badge ? `<span class="premium-badge" style="background: ${c.bg || '#fffbe6'}; color: #b45309;">${c.badge}</span>` : '';
+        }
+
         return `
-          <div class="post ${premiumClass}" style="position: relative;">
+          <div class="post ${premiumClass}" style="${bgStyle}">
             <div class="meta"><span>${p.tag}</span><span>${new Date(p.created_at).toLocaleString()}</span></div>
-            <div class="text" style="${textStyle}">${sanitize(p.text)}</div>
-            ${badge}
+            <div class="text" style="${textStyle}">${sanitize(p.text)}${badge}</div>
             <div class="actions">
               <button class="like ${hasLiked(p.id) ? 'liked' : ''}" data-id="${p.id}" ${hasLiked(p.id) ? 'disabled' : ''}>
                 <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -536,8 +596,6 @@ document.addEventListener('DOMContentLoaded', () => {
         countEl.textContent = oldCount;
         likeBtn.classList.remove('liked');
         likeBtn.disabled = false;
-        const liked = JSON.parse(localStorage.getItem('likedPosts') || '[]').filter(x => x !== id);
-        localStorage.setItem('likedPosts', JSON.stringify(liked));
         alert('Like failed: ' + err.message);
       }
     }
@@ -546,9 +604,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const text = decodeURIComponent(shareBtn.dataset.text);
       const tag = shareBtn.dataset.tag;
       if (navigator.share) {
-        navigator.share({ title: `AnonyBox (${tag})`, text, url: location.href }).catch(console.error);
+        navigator.share({ title: `AnonyBox (${tag})`, text, url: location.href }).catch(() => {});
       } else {
-        navigator.clipboard.writeText(text + '\n' + location.href).then(() => alert('Copied!')).catch(() => alert('Copy failed'));
+        navigator.clipboard.writeText(text + '\n' + location.href).then(() => alert('Copied!'));
       }
     }
   });
