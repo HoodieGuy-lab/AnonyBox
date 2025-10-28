@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -7,6 +6,7 @@
 <link rel="icon" href="https://github.com/HoodieGuy-lab/AnonyBox/blob/main/anonymous-message.png?raw=true" type="image/x-icon">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script async src="https://openfpcdn.io/fingerprintjs/v4"></script>
 <style>
 :root {
   --bg: #e8f0fe;
@@ -446,22 +446,52 @@ document.addEventListener('DOMContentLoaded', () => {
     return div.innerHTML;
   };
 
-  function getAnonUserId() {
-    let id = localStorage.getItem('anonUserId');
-    if (!id) {
-      id = crypto.randomUUID() || 'anon-' + Math.random().toString(36).slice(2);
-      localStorage.setItem('anonUserId', id);
+  async function getAnonUserId() {
+    // Get various browser/device characteristics
+    const fpPromise = import('https://openfpcdn.io/fingerprintjs/v4')
+      .then(FingerprintJS => FingerprintJS.load());
+    
+    try {
+      // Get browser fingerprint
+      const fp = await fpPromise;
+      const result = await fp.get();
+      
+      // Combine with additional device info
+      const deviceInfo = {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+        platform: navigator.platform,
+        screenResolution: `${window.screen.width}x${window.screen.height}`,
+        fingerprint: result.visitorId
+      };
+      
+      // Create a hash of all the device info
+      const deviceString = JSON.stringify(deviceInfo);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(deviceString));
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const deviceId = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      return `device-${deviceId.slice(0, 32)}`;
+    } catch (error) {
+      console.error('Error generating device ID:', error);
+      // Fallback to a random ID if fingerprinting fails
+      return 'fallback-' + crypto.randomUUID();
     }
-    return id;
   }
 
-  const hasLiked = id => JSON.parse(localStorage.getItem('likedPosts') || '[]').includes(String(id));
-  const saveLikeLocal = id => {
-    const liked = JSON.parse(localStorage.getItem('likedPosts') || '[]');
-    if (!liked.includes(String(id))) {
-      liked.push(String(id));
-      localStorage.setItem('likedPosts', JSON.stringify(liked));
+  const hasLiked = async (id) => {
+    const userId = getAnonUserId();
+    const { data, error } = await supabase
+      .from('likes')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('confession_id', id)
+      .single();
+    if (error) {
+      console.error('Error checking like:', error);
+      return false;
     }
+    return !!data;
   };
 
   premiumForm.addEventListener('submit', (e) => {
@@ -521,6 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
   async function renderFeed() {
     try {
       feed.innerHTML = '<div class="card"><div class="loader"></div></div>';
+      // Get the user ID first since we need it for like checking
+      const userId = await getAnonUserId();
       let query = supabase.from('confessions').select('*').range(0, 9);
       if (filterSelect.value !== 'all') query = query.eq('tag', filterSelect.value);
       const { data: posts, error } = await query;
@@ -533,7 +565,8 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (sortSelect.value === 'hot') posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
       else if (sortSelect.value === 'random') posts.sort(() => Math.random() - 0.5);
 
-      feed.innerHTML = posts.map(p => {
+      const likeChecks = await Promise.all(posts.map(p => hasLiked(p.id)));
+      feed.innerHTML = posts.map((p, index) => {
         const premiumClass = p.is_premium ? 'premium' : '';
         let textStyle = '';
         let badge = '';
@@ -580,19 +613,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const likeBtn = ev.target.closest('.like');
     if (likeBtn) {
       const id = likeBtn.dataset.id;
-      if (hasLiked(id)) return;
-      const countEl = likeBtn.querySelector('.like-count');
-      const oldCount = +countEl.textContent;
-      countEl.textContent = oldCount + 1;
-      likeBtn.classList.add('liked');
-      likeBtn.disabled = true;
-      saveLikeLocal(id);
-      const userId = getAnonUserId();
+      const userId = await getAnonUserId();
+      
       try {
+        // Check if already liked
+        const alreadyLiked = await hasLiked(id);
+        if (alreadyLiked) return;
+
+        // Update UI
+        const countEl = likeBtn.querySelector('.like-count');
+        const oldCount = +countEl.textContent;
+        countEl.textContent = oldCount + 1;
+        likeBtn.classList.add('liked');
+        likeBtn.disabled = true;
+
+        // Update database
         await supabase.from('likes').insert({ user_id: userId, confession_id: +id });
         await supabase.rpc('increment_like', { confession_id_input: +id });
         await supabase.from('audit_logs').insert({ action: 'like', confession_id: +id, user_id: userId });
       } catch (err) {
+        // Revert UI changes on error
         countEl.textContent = oldCount;
         likeBtn.classList.remove('liked');
         likeBtn.disabled = false;
@@ -619,7 +659,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
-
-
