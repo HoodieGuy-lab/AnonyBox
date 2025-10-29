@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,251 +9,75 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script async src="https://openfpcdn.io/fingerprintjs/v4"></script>
 <style>
-:root {
-  --bg: #e8f0fe;
-  --card: #ffffff;
-  --accent: #7c3aed;
-  --accent-dark: #6d28d9;
-  --text: #1e1b4b;
-  --muted: #64748b;
-  --shadow: rgba(0, 0, 0, 0.1);
-  --border: #c7d2fe;
-  --gradient: linear-gradient(45deg, #dbeafe 0%, #f5f3ff 100%);
-  --premium-gold: #ffd700;
-  --premium-glow: #ff6b6b;
-}
-[data-theme="dark"] {
-  --bg: #1e1b4b;
-  --card: #2e2b5f;
-  --accent: #a78bfa;
-  --accent-dark: #7c3aed;
-  --text: #e0e7ff;
-  --muted: #94a3b8;
-  --shadow: rgba(0, 0, 0, 0.3);
-  --border: #4b5e9e;
-  --gradient: linear-gradient(45deg, #2e2b5f 0%, #4b4b8b 100%);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Poppins', sans-serif;
-  background: var(--gradient);
-  color: var(--text);
-  padding: 48px;
-  min-height: 100vh;
-  line-height: 1.6;
-  position: relative;
-  overflow-x: hidden;
-}
-body::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
-  z-index: -1; opacity: 0.5;
-  animation: gradientShift 15s ease-in-out infinite;
-}
-@keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-.wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
-header { text-align: center; margin-bottom: 36px; }
-h1 {
-  font-size: 48px; font-weight: 700;
-  background: linear-gradient(to right, var(--accent-dark), var(--accent));
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent; margin-bottom: 10px;
-}
-.subtitle { font-size: 18px; color: var(--muted); font-weight: 400; }
-
-.theme-toggle {
-  position: absolute; top: 48px; right: 48px;
-  background: var(--card); border: 2px solid var(--border);
-  border-radius: 12px; padding: 10px 20px;
-  font-size: 15px; font-weight: 600;
-  cursor: pointer; color: var(--text);
-  transition: all 0.3s ease;
-  z-index: 20;
-}
-.theme-toggle:hover {
-  background: var(--accent); color: #ffffff;
-  transform: scale(1.05);
-}
-
-.app { display: flex; flex-direction: column; gap: 36px; }
-.card {
-  background: var(--card); border-radius: 16px;
-  padding: 28px; box-shadow: 0 6px 20px var(--shadow);
-  border: 2px solid var(--border);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px var(--shadow); }
-
-.composer strong { font-size: 18px; font-weight: 600; display: block; margin-bottom: 14px; color: var(--accent-dark); }
-.composer textarea {
-  width: 100%; min-height: 180px;
-  padding: 18px; border-radius: 12px;
-  border: 2px solid var(--border); resize: vertical;
-  font-size: 15px; font-family: 'Poppins', sans-serif;
-  background: var(--card); color: var(--text);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-.composer textarea:focus {
-  outline: none; border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
-}
-.char-count { font-size: 13px; color: var(--muted); text-align: right; margin-top: 8px; }
-
-.btn {
-  padding: 12px 24px; border: none;
-  border-radius: 12px; cursor: pointer;
-  font-weight: 600; font-size: 15px;
-  font-family: 'Poppins', sans-serif;
-  transition: all 0.3s ease;
-}
-.btn.accent { background: var(--accent-dark); color: #ffffff; }
-.btn.accent:hover { background: var(--accent); transform: scale(1.03); }
-.btn.ghost { background: transparent; border: 2px solid var(--accent); color: var(--accent-dark); }
-.btn.ghost:hover { background: var(--accent); color: #ffffff; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn.premium { background: var(--premium-gold); color: #000; border: none; font-weight: 700; }
-.btn.premium:hover { background: #e6c200; }
-
-main { display: flex; flex-direction: column; gap: 28px; }
-.feed { display: flex; flex-direction: column; gap: 20px; }
-
-.post {
-  position: relative;
-  background: var(--card); border-radius: 16px;
-  padding: 24px; border: 2px solid var(--border);
-  transition: all 0.3s ease;
-}
-.post:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow); }
-
-/* PREMIUM STYLES - ONLY IF is_premium = true */
-.post.premium {
-  border: 3px solid var(--premium-gold);
-  background: linear-gradient(135deg, #fffbe6 0%, #fef3c7 100%);
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-  animation: premiumPulse 3s infinite;
-}
-@keyframes premiumPulse { 0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); } 50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); } }
-.post.premium::before {
-  content: 'PREMIUM'; font-size: 11px; font-weight: 700; color: #b45309;
-  position: absolute; top: -10px; left: 16px; background: #fffbe6; padding: 2px 10px; border-radius: 20px;
-  border: 1px solid var(--premium-gold);
-}
-
-.text { font-size: 15px; line-height: 1.7; word-wrap: break-word; }
-.meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 14px; flex-wrap: wrap; gap: 4px; }
-
-.actions { display: flex; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
-.like, .share {
-  padding: 10px 18px; border-radius: 24px;
-  border: 2px solid var(--border); background: var(--card);
-  cursor: pointer; font-size: 14px; font-weight: 600;
-  color: var(--text); display: flex; align-items: center;
-  gap: 8px; transition: all 0.3s ease, transform 0.2s ease;
-}
-.like:hover, .share:hover {
-  background: var(--accent); color: #ffffff;
-  border-color: var(--accent); transform: scale(1.05);
-}
-.like.liked { background: var(--accent-dark); color: #ffffff; border-color: var(--accent-dark); }
-.like:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.like svg, .share svg {
-  width: 18px; height: 18px; fill: none;
-  stroke: currentColor; stroke-width: 2;
-}
-
-select.sort, select.filter {
-  padding: 10px 18px; border-radius: 12px;
-  border: 2px solid var(--border); background: var(--card);
-  color: var(--text); font-family: 'Poppins', sans-serif;
-  font-size: 14px; font-weight: 600; cursor: pointer;
-  min-width: 120px;
-}
-select.sort:focus, select.filter:focus {
-  outline: none; border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
-}
-
-#previewArea { margin-top: 18px; display: none; }
-#previewArea .post { background: var(--border); }
-
-footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 14px; }
-.composer .controls {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-top: 18px;
-  gap: 14px; flex-wrap: wrap;
-}
-.composer .controls div { display: flex; gap: 14px; flex-wrap: wrap; }
-
-.RefreshNote {
-  text-align: center; font-size: 14px;
-  color: var(--muted); margin-top: -2px;
-}
-.loader {
-  border: 4px solid var(--border);
-  border-top: 4px solid var(--accent);
-  border-radius: 50%;
-  width: 24px; height: 24px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-}
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-/* PREMIUM PANEL */
-.premium-panel {
-  background: linear-gradient(135deg, #fffbe6, #fef3c7);
-  border: 2px solid var(--premium-gold);
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 16px;
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-}
-.premium-panel h3 {
-  color: #b45309; margin-bottom: 12px; font-size: 18px;
-}
-.premium-options {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-}
-.premium-option {
-  display: flex; align-items: center; gap: 8px; font-size: 14px;
-}
-.premium-option input[type="color"] { width: 36px; height: 36px; border: none; border-radius: 50%; cursor: pointer; }
-.premium-option input[type="range"] { width: 100%; }
-.premium-badge {
-  display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-left: 8px;
-}
-
-/* Modals */
-.modal {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7);
-  display: none; justify-content: center; align-items: center; z-index: 1000;
-}
-.modal-content {
-  background: var(--card); border-radius: 16px; padding: 28px; max-width: 420px; width: 90%;
-  box-shadow: 0 10px 30px var(--shadow); border: 2px solid var(--premium-gold);
-}
-#premiumForm { display: flex; flex-direction: column; gap: 14px; }
-
-/* Responsive */
-@media (max-width: 768px) {
-  body { padding: 24px; }
-  h1 { font-size: 36px; }
-  .subtitle { font-size: 16px; }
-  .theme-toggle { top: 20px; right: 20px; padding: 8px 14px; font-size: 14px; }
-  .composer textarea { min-height: 140px; font-size: 14px; }
-  .btn { padding: 10px 18px; font-size: 14px; }
-  select.sort, select.filter { width: 48%; min-width: auto; }
-  .composer .controls { flex-direction: column; align-items: stretch; }
-  .composer .controls > div { width: 100%; justify-content: space-between; }
-  .premium-options { grid-template-columns: 1fr; }
+:root{--bg:#e8f0fe;--card:#fff;--accent:#7c3aed;--accent-dark:#6d28d9;--text:#1e1b4b;--muted:#64748b;--shadow:rgba(0,0,0,.1);--border:#c7d2fe;--gradient:linear-gradient(45deg,#dbeafe 0%,#f5f3ff 100%);--premium-gold:#ffd700}
+[data-theme=dark]{--bg:#1e1b4b;--card:#2e2b5f;--accent:#a78bfa;--accent-dark:#7c3aed;--text:#e0e7ff;--muted:#94a3b8;--shadow:rgba(0,0,0,.3);--border:#4b5e9e;--gradient:linear-gradient(45deg,#2e2b5f 0%,#4b4b8b 100%)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:var(--gradient);color:var(--text);padding:48px;min-height:100vh;line-height:1.6;position:relative;overflow-x:hidden}
+body::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle,rgba(124,58,237,.1)0%,transparent 70%);z-index:-1;opacity:.5;animation:gradientShift 15s ease-in-out infinite}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+header{text-align:center;margin-bottom:36px}
+h1{font-size:48px;font-weight:700;background:linear-gradient(to right,var(--accent-dark),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px}
+.subtitle{font-size:18px;color:var(--muted);font-weight:400}
+.theme-toggle{position:absolute;top:48px;right:48px;background:var(--card);border:2px solid var(--border);border-radius:12px;padding:10px 20px;font-size:15px;font-weight:600;cursor:pointer;color:var(--text);transition:all .3s;z-index:20}
+.theme-toggle:hover{background:var(--accent);color:#fff;transform:scale(1.05)}
+.app{display:flex;flex-direction:column;gap:36px}
+.card{background:var(--card);border-radius:16px;padding:28px;box-shadow:0 6px 20px var(--shadow);border:2px solid var(--border);transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-4px);box-shadow:0 10px 24px var(--shadow)}
+.composer strong{font-size:18px;font-weight:600;display:block;margin-bottom:14px;color:var(--accent-dark)}
+.composer textarea{width:100%;min-height:180px;padding:18px;border-radius:12px;border:2px solid var(--border);resize:vertical;font-size:15px;font-family:'Poppins',sans-serif;background:var(--card);color:var(--text);transition:border-color .3s,box-shadow .3s}
+.composer textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 8px rgba(124,58,237,.3)}
+.char-count{font-size:13px;color:var(--muted);text-align:right;margin-top:8px}
+.btn{padding:12px 24px;border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:15px;font-family:'Poppins',sans-serif;transition:all .3s}
+.btn.accent{background:var(--accent-dark);color:#fff}
+.btn.accent:hover{background:var(--accent);transform:scale(1.03)}
+.btn.ghost{background:transparent;border:2px solid var(--accent);color:var(--accent-dark)}
+.btn.ghost:hover{background:var(--accent);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.premium{background:var(--premium-gold);color:#000;font-weight:700}
+.btn.premium:hover{background:#e6c200}
+.feed{display:flex;flex-direction:column;gap:20px}
+.post{position:relative;background:var(--card);border-radius:16px;padding:24px;border:2px solid var(--border);transition:all .3s}
+.post:hover{transform:translateY(-4px);box-shadow:0 8px 20px var(--shadow)}
+.post.premium{border:3px solid var(--premium-gold);background:linear-gradient(135deg,#fffbe6 0%,#fef3c7 100%);box-shadow:0 0 30px rgba(255,215,0,.5);animation:premiumPulse 3s infinite}
+@keyframes premiumPulse{0%,100%{box-shadow:0 0 30px rgba(255,215,0,.5)}50%{box-shadow:0 0 40px rgba(255,215,0,.8)}}
+.post.premium::before{content:'PREMIUM';font-size:11px;font-weight:700;color:#b45309;position:absolute;top:-10px;left:16px;background:#fffbe6;padding:2px 10px;border-radius:20px;border:1px solid var(--premium-gold)}
+.text{font-size:15px;line-height:1.7;word-wrap:break-word}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:14px;flex-wrap:wrap;gap:4px}
+.actions{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap}
+.like,.share{padding:10px 18px;border-radius:24px;border:2px solid var(--border);background:var(--card);cursor:pointer;font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;transition:all .3s,transform .2s}
+.like:hover,.share:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.05)}
+.like.liked{background:var(--accent-dark);color:#fff;border-color:var(--accent-dark)}
+.like:disabled{opacity:.5;cursor:not-allowed}
+.like svg,.share svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+select.sort,select.filter{padding:10px 18px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-width:120px}
+select.sort:focus,select.filter:focus{outline:none;border-color:var(--accent);box-shadow:0 0 8px rgba(124,58,237,.3)}
+#previewArea{margin-top:18px;display:none}
+footer{text-align:center;margin-top:56px;color:var(--muted);font-size:14px}
+.composer .controls{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:14px;flex-wrap:wrap}
+.composer .controls div{display:flex;gap:14px;flex-wrap:wrap}
+.loader{border:4px solid var(--border);border-top:4px solid var(--accent);border-radius:50%;width:24px;height:24px;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.premium-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.premium-option{display:flex;align-items:center;gap:8px;font-size:14px}
+.premium-option input[type=color]{width:36px;height:36px;border:none;border-radius:50%;cursor:pointer}
+.premium-option input[type=range]{width:100%}
+.premium-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-left:8px}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;justify-content:center;align-items:center;z-index:1000}
+.modal-content{background:var(--card);border-radius:16px;padding:28px;max-width:420px;width:90%;box-shadow:0 10px 30px var(--shadow);border:2px solid var(--premium-gold)}
+#premiumForm{display:flex;flex-direction:column;gap:14px}
+@media(max-width:768px){
+  body{padding:24px}h1{font-size:36px}.subtitle{font-size:16px}
+  .theme-toggle{top:20px;right:20px;padding:8px 14px;font-size:14px}
+  .composer textarea{min-height:140px;font-size:14px}
+  .btn{padding:10px 18px;font-size:14px}
+  select.sort,select.filter{width:48%;min-width:auto}
+  .composer .controls{flex-direction:column;align-items:stretch}
+  .composer .controls>div{width:100%;justify-content:space-between}
+  .premium-options{grid-template-columns:1fr}
 }
 </style>
 </head>
-
 <body>
 <div class="wrap">
   <header>
@@ -260,11 +85,13 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
     <div class="subtitle">Share secrets. Read others. Stay anonymous.</div>
     <button class="theme-toggle" id="themeToggle">Dark</button>
   </header>
+
   <div class="app">
     <aside class="card composer">
       <strong>Post a confession</strong>
       <textarea id="bioInput" placeholder="Type your secret... (max 800 chars)" maxlength="800"></textarea>
       <div class="char-count" id="charCount">0/800</div>
+
       <div class="controls">
         <select id="tagSelect" class="sort">
           <option value="General">General</option>
@@ -276,13 +103,10 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
         <div>
           <button class="btn ghost" id="previewBtn">Preview</button>
           <button class="btn accent" id="postBtn">Post</button>
-
-          <!-- $1.99 PREMIUM BUTTON -->
-          <button class="btn premium" id="premiumBtn">
-            $1.99 Premium Post
-          </button>
+          <button class="btn premium" id="premiumBtn">$1.99 Premium Post</button>
         </div>
       </div>
+
       <div id="previewArea">
         <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Preview</div>
         <div class="post"><div class="text" id="previewText"></div></div>
@@ -290,8 +114,8 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
     </aside>
 
     <main>
-      <div class="card" style="display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:20px;">
-        <div style="display:flex; gap:14px; flex-wrap:wrap; width:100%; justify-content:space-between;">
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;width:100%;justify-content:space-between;">
           <select id="sortSelect" class="sort">
             <option value="new">Newest</option>
             <option value="hot">Hot</option>
@@ -308,6 +132,7 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
         </div>
         <button class="btn ghost" id="refreshBtn" style="margin-top:10px;width:100%">Refresh Feed</button>
       </div>
+
       <div id="feed" class="feed"></div>
     </main>
   </div>
@@ -316,45 +141,29 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
   <footer>Built by NovaPixels<br/>copyright &copy; 2025</footer>
 </div>
 
-<!-- PREMIUM PANEL MODAL -->
+<!-- PREMIUM MODAL -->
 <div class="modal" id="premiumModal">
   <div class="modal-content">
-    <h3 style="margin-bottom:16px; color: #b45309;">Premium Customization Panel</h3>
-    <p style="font-size:14px; color:green; margin-bottom:12px;">Payment successful! Customize your post.</p>
+    <h3 style="margin-bottom:16px;color:#b45309;">Premium Customization Panel</h3>
+    <p style="font-size:14px;color:green;margin-bottom:12px;">Payment successful! Customize your post.</p>
     <form id="premiumForm">
       <div class="premium-options">
-        <div class="premium-option">
-          <input type="checkbox" name="bold" value="true"> <strong>Bold</strong>
-        </div>
-        <div class="premium-option">
-          <input type="checkbox" name="italic" value="true"> <em>Italic</em>
-        </div>
-        <div class="premium-option">
-          <input type="checkbox" name="underline" value="true"> <u>Underline</u>
-        </div>
-        <div class="premium-option">
-          <input type="checkbox" name="glow" value="true"> Glow Effect
-        </div>
-        <div class="premium-option">
-          <label>Text Color: <input type="color" name="color" value="#b45309"></label>
-        </div>
-        <div class="premium-option">
-          <label>BG Color: <input type="color" name="bg" value="#fffbe6"></label>
-        </div>
-        <div class="premium-option">
-          <label>Font Size: <input type="range" name="size" min="12" max="24" value="16"></label>
-        </div>
-        <div class="premium-option">
-          <label>Badge: 
-            <select name="badge">
-              <option value="">None</option>
-              <option value="Fire">Fire</option>
-              <option value="Star">Star</option>
-              <option value="Crown">Crown</option>
-              <option value="Diamond">Diamond</option>
-            </select>
-          </label>
-        </div>
+        <div class="premium-option"><input type="checkbox" name="bold" value="true"><strong>Bold</strong></div>
+        <div class="premium-option"><input type="checkbox" name="italic" value="true"><em>Italic</em></div>
+        <div class="premium-option"><input type="checkbox" name="underline" value="true"><u>Underline</u></div>
+        <div class="premium-option"><input type="checkbox" name="glow" value="true">Glow Effect</div>
+        <div class="premium-option"><label>Text Color: <input type="color" name="color" value="#b45309"></label></div>
+        <div class="premium-option"><label>BG Color: <input type="color" name="bg" value="#fffbe6"></label></div>
+        <div class="premium-option"><label>Font Size: <input type="range" name="size" min="12" max="24" value="16"></label></div>
+        <div class="premium-option"><label>Badge:
+          <select name="badge">
+            <option value="">None</option>
+            <option value="Fire">Fire</option>
+            <option value="Star">Star</option>
+            <option value="Crown">Crown</option>
+            <option value="Diamond">Diamond</option>
+          </select>
+        </label></div>
       </div>
       <button type="submit" class="btn accent" style="margin-top:16px;">Apply & Post Premium</button>
     </form>
@@ -363,298 +172,226 @@ footer { text-align: center; margin-top: 56px; color: var(--muted); font-size: 1
 </div>
 
 <script>
-const supabaseUrl = 'https://ylpdsyyrleebptmxgrhl.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlscGRzeXlybGVlYnB0bXhncmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyNzYwMDMsImV4cCI6MjA3NTg1MjAwM30.EwUbLO3XGwxWBkJKZCNjtTF6IFRyH4hhqU4lJvLLsn8';
+/* ---------- Supabase ---------- */
+const supabaseUrl = 'https://pewoxtrrtfppidfjawda.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBld294dHJydGZwcGlkZmphd2RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NDU2MjMsImV4cCI6MjA3NzMyMTYyM30.6-1-FtrdjIH2SUwITen8XtMlsTsrnjF_qIK1FW7iRyY';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+/* ---------- State ---------- */
 let canPostPremium = false;
 let customizations = {};
+let userId = null;
+let likedCache = new Set();
+let likingInProgress = new Set();
 
-document.addEventListener('DOMContentLoaded', () => {
-  const bioInput = document.getElementById('bioInput');
-  const postBtn = document.getElementById('postBtn');
-  const previewBtn = document.getElementById('previewBtn');
-  const previewArea = document.getElementById('previewArea');
-  const previewText = document.getElementById('previewText');
-  const feed = document.getElementById('feed');
-  const sortSelect = document.getElementById('sortSelect');
-  const filterSelect = document.getElementById('filterSelect');
-  const refreshBtn = document.getElementById('refreshBtn');
-  const themeToggle = document.getElementById('themeToggle');
-  const charCount = document.getElementById('charCount');
-  const premiumModal = document.getElementById('premiumModal');
-  const premiumForm = document.getElementById('premiumForm');
-  const skipPremium = document.getElementById('skipPremium');
-  const premiumBtn = document.getElementById('premiumBtn');
+/* ---------- Helpers ---------- */
+const safe = t => { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; };
 
-  // CHECK PAYMENT
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('payment') === 'success') {
-    canPostPremium = true;
-    localStorage.setItem('premiumPaid', 'true');
-    premiumModal.style.display = 'flex';
-    history.replaceState(null, null, window.location.pathname);
-  }
+/* ---------- Fingerprint ---------- */
+async function initUserId() {
+  if (userId) return userId;
+  try {
+    const fp = await import('https://openfpcdn.io/fingerprintjs/v4').then(m=>m.load()).then(f=>f.get());
+    const info = {ua:navigator.userAgent,lang:navigator.language,platform:navigator.platform,screen:`${screen.width}x${screen.height}`,fp:fp.visitorId};
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(info)));
+    userId = 'dev-'+Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32);
+  } catch { userId = 'fallback-'+crypto.randomUUID(); }
+  return userId;
+}
 
-  if (localStorage.getItem('premiumPaid') === 'true') {
-    canPostPremium = true;
-  }
+/* ---------- Sync Likes ---------- */
+async function syncLikes() {
+  await initUserId();
+  const {data} = await supabase.from('likes').select('confession_id').eq('user_id',userId);
+  likedCache = new Set(data?.map(l=>String(l.confession_id)) ?? []);
+}
 
-  // PAYPAL.ME POPUP
-  premiumBtn.addEventListener('click', () => {
-    if (canPostPremium) {
-      premiumModal.style.display = 'flex';
-      return;
-    }
-    const popup = window.open(
-      'https://paypal.me/NovaPixelDev/1.99?return_url=' + encodeURIComponent(location.href + '?payment=success'),
-      'paypal',
-      'width=500,height=600,scrollbars=yes,resizable=yes'
-    );
-    const checkClosed = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(checkClosed);
-        setTimeout(() => {
-          if (localStorage.getItem('premiumPaid') === 'true') {
-            premiumModal.style.display = 'flex';
-          }
-        }, 2000);
-      }
-    }, 1000);
-  });
+/* ---------- DOM Ready ---------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  const els = {
+    bio: document.getElementById('bioInput'),
+    postBtn: document.getElementById('postBtn'),
+    previewBtn: document.getElementById('previewBtn'),
+    previewArea: document.getElementById('previewArea'),
+    previewText: document.getElementById('previewText'),
+    feed: document.getElementById('feed'),
+    sort: document.getElementById('sortSelect'),
+    filter: document.getElementById('filterSelect'),
+    refresh: document.getElementById('refreshBtn'),
+    theme: document.getElementById('themeToggle'),
+    char: document.getElementById('charCount'),
+    premiumModal: document.getElementById('premiumModal'),
+    premiumForm: document.getElementById('premiumForm'),
+    skipPremium: document.getElementById('skipPremium'),
+    premiumBtn: document.getElementById('premiumBtn')
+  };
 
   // Theme
-  const setTheme = (theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    themeToggle.textContent = theme === 'dark' ? 'Light' : 'Dark';
-  };
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  setTheme(savedTheme);
-  themeToggle.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
-  });
+  const setTheme = t=>{ document.documentElement.setAttribute('data-theme',t); localStorage.setItem('theme',t); els.theme.textContent=t==='dark'?'Light':'Dark';};
+  setTheme(localStorage.getItem('theme')||'light');
+  els.theme.addEventListener('click',()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
 
-  bioInput.addEventListener('input', () => {
-    charCount.textContent = `${bioInput.value.length}/800`;
-  });
+  // Char count
+  els.bio.addEventListener('input',()=>els.char.textContent=`${els.bio.value.length}/800`);
 
-  const sanitize = text => {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  };
-
-  async function getAnonUserId() {
-    // Get various browser/device characteristics
-    const fpPromise = import('https://openfpcdn.io/fingerprintjs/v4')
-      .then(FingerprintJS => FingerprintJS.load());
-    
-    try {
-      // Get browser fingerprint
-      const fp = await fpPromise;
-      const result = await fp.get();
-      
-      // Combine with additional device info
-      const deviceInfo = {
-        userAgent: navigator.userAgent,
-        language: navigator.language,
-        platform: navigator.platform,
-        screenResolution: `${window.screen.width}x${window.screen.height}`,
-        fingerprint: result.visitorId
-      };
-      
-      // Create a hash of all the device info
-      const deviceString = JSON.stringify(deviceInfo);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(deviceString));
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const deviceId = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
-      return `device-${deviceId.slice(0, 32)}`;
-    } catch (error) {
-      console.error('Error generating device ID:', error);
-      // Fallback to a random ID if fingerprinting fails
-      return 'fallback-' + crypto.randomUUID();
-    }
+  // Premium flow
+  const urlParams = new URLSearchParams(location.search);
+  if (urlParams.get('payment')==='success'){
+    canPostPremium = true;
+    localStorage.setItem('premiumPaid','true');
+    els.premiumModal.style.display='flex';
+    history.replaceState(null,null,location.pathname);
   }
+  if (localStorage.getItem('premiumPaid')==='true') canPostPremium=true;
 
-  const hasLiked = async (id) => {
-    const userId = getAnonUserId();
-    const { data, error } = await supabase
-      .from('likes')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('confession_id', id)
-      .single();
-    if (error) {
-      console.error('Error checking like:', error);
-      return false;
-    }
-    return !!data;
-  };
+  els.premiumBtn.addEventListener('click',()=>{
+    if (canPostPremium){ els.premiumModal.style.display='flex'; return; }
+    const returnUrl = location.href.split('?')[0]+'?payment=success';
+    const paypal = window.open(`https://paypal.me/NovaPixelDev/1.99?return_url=${encodeURIComponent(returnUrl)}`,'paypal','width=560,height=660');
+    const poll = setInterval(()=>{ if(paypal.closed){ clearInterval(poll); setTimeout(()=>{ if(localStorage.getItem('premiumPaid')==='true') els.premiumModal.style.display='flex'; },1500); } },800);
+  });
 
-  premiumForm.addEventListener('submit', (e) => {
+  els.premiumForm.addEventListener('submit',e=>{
     e.preventDefault();
-    const formData = new FormData(premiumForm);
-    customizations = Object.fromEntries(formData);
-    premiumModal.style.display = 'none';
-    postConfession(true); // isPremium = true
+    customizations = Object.fromEntries(new FormData(els.premiumForm));
+    els.premiumModal.style.display='none';
+    postConfession(true);
+  });
+  els.skipPremium.addEventListener('click',()=>{ els.premiumModal.style.display='none'; postConfession(false); });
+
+  // Preview
+  els.previewBtn.addEventListener('click',()=>{
+    const v=els.bio.value.trim(); if(!v) return alert('Write something first!');
+    els.previewText.innerHTML=safe(v); els.previewArea.style.display='block';
   });
 
-  skipPremium.addEventListener('click', () => {
-    premiumModal.style.display = 'none';
-    postConfession(false); // isPremium = false
-  });
+  // Post
+  async function postConfession(isPremium=false){
+    const text=els.bio.value.trim(); if(!text) return alert('Write something first!');
+    if(isPremium && !canPostPremium) return alert('Pay $1.99 first!');
 
-  previewBtn.addEventListener('click', () => {
-    const val = bioInput.value.trim();
-    if (!val) return alert('Write something first!');
-    previewText.innerHTML = sanitize(val);
-    previewArea.style.display = 'block';
-  });
+    els.postBtn.disabled=true; els.postBtn.innerHTML='<div class="loader"></div>';
+    try{
+      const payload = {text, tag:document.getElementById('tagSelect').value, is_premium:isPremium};
+      if(isPremium) payload.customization = customizations;
+      const {error}=await supabase.from('confessions').insert([payload]);
+      if(error) throw error;
 
-  // POST FUNCTION - NOW ACCEPTS isPremium
-  async function postConfession(isPremium = false) {
-    const text = bioInput.value.trim();
-    if (!text) return alert('Write something first!');
-    if (isPremium && !canPostPremium) return alert('Pay $1.99 first!');
-    try {
-      postBtn.disabled = true;
-      postBtn.innerHTML = '<div class="loader"></div>';
-      const insertData = { 
-        text, 
-        tag: document.getElementById('tagSelect').value, 
-        is_premium: isPremium,
-        customization: isPremium ? customizations : null
-      };
-      const { error } = await supabase.from('confessions').insert([insertData]);
-      if (error) throw error;
-      bioInput.value = '';
-      charCount.textContent = '0/800';
-      previewArea.style.display = 'none';
-      if (isPremium) {
-        canPostPremium = false;
-        localStorage.removeItem('premiumPaid');
-      }
+      els.bio.value=''; els.char.textContent='0/800'; els.previewArea.style.display='none';
+      if(isPremium){ canPostPremium=false; localStorage.removeItem('premiumPaid'); }
       await renderFeed();
-    } catch (err) {
-      alert('Failed to post: ' + err.message);
-    } finally {
-      postBtn.disabled = false;
-      postBtn.innerHTML = 'Post';
-    }
+    }catch(err){ alert('Post failed: '+err.message); }
+    finally{ els.postBtn.disabled=false; els.postBtn.innerHTML='Post'; }
   }
+  els.postBtn.addEventListener('click',()=>postConfession(false));
 
-  postBtn.addEventListener('click', () => postConfession(false)); // Free post
+  // Render Feed + REAPPLY LIKED STATE
+  async function renderFeed(){
+    els.feed.innerHTML='<div class="card"><div class="loader"></div></div>';
+    try{
+      let q = supabase.from('confessions').select('*').range(0,49);
+      if(els.filter.value!=='all') q=q.eq('tag',els.filter.value);
+      const {data:posts,error}=await q;
+      if(error) throw error;
+      if(!posts?.length){ els.feed.innerHTML='<div class="card">No confessions yet!</div>'; return; }
 
-  async function renderFeed() {
-    try {
-      feed.innerHTML = '<div class="card"><div class="loader"></div></div>';
-      // Get the user ID first since we need it for like checking
-      const userId = await getAnonUserId();
-      let query = supabase.from('confessions').select('*').range(0, 9);
-      if (filterSelect.value !== 'all') query = query.eq('tag', filterSelect.value);
-      const { data: posts, error } = await query;
-      if (error) throw error;
-      if (!posts?.length) {
-        feed.innerHTML = '<div class="card">No confessions yet!</div>';
-        return;
-      }
-      if (sortSelect.value === 'new') posts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      else if (sortSelect.value === 'hot') posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-      else if (sortSelect.value === 'random') posts.sort(() => Math.random() - 0.5);
+      if(els.sort.value==='new') posts.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+      else if(els.sort.value==='hot') posts.sort((a,b)=>(b.likes||0)-(a.likes||0));
+      else if(els.sort.value==='random') posts.sort(()=>Math.random()-.5);
 
-      const likeChecks = await Promise.all(posts.map(p => hasLiked(p.id)));
-      feed.innerHTML = posts.map((p, index) => {
-        const premiumClass = p.is_premium ? 'premium' : '';
-        let textStyle = '';
-        let badge = '';
-        let bgStyle = '';
-
-        if (p.is_premium && p.customization) {
-          const c = p.customization;
-          textStyle = `
-            ${c.bold ? 'font-weight: bold;' : ''}
-            ${c.italic ? 'font-style: italic;' : ''}
-            ${c.underline ? 'text-decoration: underline;' : ''}
-            color: ${c.color || '#b45309'};
-            font-size: ${c.size || 16}px;
-            ${c.glow ? 'text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);' : ''}
-          `;
-          bgStyle = c.bg ? `background: ${c.bg};` : '';
-          badge = c.badge ? `<span class="premium-badge" style="background: ${c.bg || '#fffbe6'}; color: #b45309;">${c.badge}</span>` : '';
+      // Render HTML
+      els.feed.innerHTML = posts.map(p=>{
+        const premiumClass = p.is_premium?'premium':'';
+        let textStyle='',bgStyle='',badge='';
+        if(p.is_premium && p.customization){
+          const c=p.customization;
+          textStyle = `${c.bold?'font-weight:bold;':''}${c.italic?'font-style:italic;':''}${c.underline?'text-decoration:underline;':''}color:${c.color||'#b45309'};font-size:${c.size||16}px;${c.glow?'text-shadow:0 0 10px rgba(255,215,0,.8);':''}`.trim();
+          bgStyle = c.bg?`background:${c.bg};`:'';
+          badge = c.badge?`<span class="premium-badge" style="background:${c.bg||'#fffbe6'};color:#b45309;">${c.badge}</span>`:'';
         }
-
         return `
           <div class="post ${premiumClass}" style="${bgStyle}">
             <div class="meta"><span>${p.tag}</span><span>${new Date(p.created_at).toLocaleString()}</span></div>
-            <div class="text" style="${textStyle}">${sanitize(p.text)}${badge}</div>
+            <div class="text" style="${textStyle}">${safe(p.text)}${badge}</div>
             <div class="actions">
-              <button class="like ${hasLiked(p.id) ? 'liked' : ''}" data-id="${p.id}" ${hasLiked(p.id) ? 'disabled' : ''}>
+              <button class="like" data-id="${p.id}">
                 <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <span class="like-count">${p.likes || 0}</span>
+                <span class="like-count">${p.likes||0}</span>
               </button>
               <button class="share" data-text="${encodeURIComponent(p.text)}" data-tag="${p.tag}">
                 <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
                 Share
               </button>
             </div>
-          </div>
-        `;
+          </div>`;
       }).join('');
-    } catch (err) {
-      feed.innerHTML = '<div class="card">Error loading feed: ' + err.message + '</div>';
-    }
+
+      // CRITICAL: Re-apply liked state AFTER HTML is inserted
+      document.querySelectorAll('.like').forEach(btn => {
+        const id = btn.dataset.id;
+        if (likedCache.has(id)) {
+          btn.classList.add('liked');
+          btn.disabled = true;
+        }
+      });
+
+    }catch(err){ els.feed.innerHTML=`<div class="card">Error: ${err.message}</div>`; }
   }
 
-  // Likes & Share
-  feed.addEventListener('click', async (ev) => {
-    const likeBtn = ev.target.closest('.like');
-    if (likeBtn) {
-      const id = likeBtn.dataset.id;
-      const userId = await getAnonUserId();
-      
-      try {
-        // Check if already liked
-        const alreadyLiked = await hasLiked(id);
-        if (alreadyLiked) return;
+  // Like Handler
+  els.feed.addEventListener('click', async e=>{
+    const likeBtn = e.target.closest('.like');
+    if (!likeBtn || likeBtn.disabled) return;
 
-        // Update UI
-        const countEl = likeBtn.querySelector('.like-count');
-        const oldCount = +countEl.textContent;
-        countEl.textContent = oldCount + 1;
-        likeBtn.classList.add('liked');
-        likeBtn.disabled = true;
+    const id = likeBtn.dataset.id;
+    if (likingInProgress.has(id)) return;
+    likingInProgress.add(id);
 
-        // Update database
-        await supabase.from('likes').insert({ user_id: userId, confession_id: +id });
-        await supabase.rpc('increment_like', { confession_id_input: +id });
-        await supabase.from('audit_logs').insert({ action: 'like', confession_id: +id, user_id: userId });
-      } catch (err) {
-        // Revert UI changes on error
-        countEl.textContent = oldCount;
-        likeBtn.classList.remove('liked');
-        likeBtn.disabled = false;
-        alert('Like failed: ' + err.message);
-      }
-    }
-    const shareBtn = ev.target.closest('.share');
-    if (shareBtn) {
-      const text = decodeURIComponent(shareBtn.dataset.text);
-      const tag = shareBtn.dataset.tag;
-      if (navigator.share) {
-        navigator.share({ title: `AnonyBox (${tag})`, text, url: location.href }).catch(() => {});
-      } else {
-        navigator.clipboard.writeText(text + '\n' + location.href).then(() => alert('Copied!'));
-      }
+    const countEl = likeBtn.querySelector('.like-count');
+    const old = +countEl.textContent;
+
+    // Optimistic UI
+    countEl.textContent = old + 1;
+    likeBtn.classList.add('liked');
+    likeBtn.disabled = true;
+    likedCache.add(id);
+
+    try {
+      const uid = await initUserId();
+      const { error } = await supabase.from('likes').insert({ user_id: uid, confession_id: +id });
+      if (error && error.code !== '23505') throw error;
+      if (!error) await supabase.rpc('increment_like', { confession_id_input: +id });
+    } catch (err) {
+      countEl.textContent = old;
+      likeBtn.classList.remove('liked');
+      likeBtn.disabled = false;
+      likedCache.delete(id);
+      console.error('Like failed:', err);
+    } finally {
+      likingInProgress.delete(id);
     }
   });
 
-  sortSelect.addEventListener('change', renderFeed);
-  filterSelect.addEventListener('change', renderFeed);
-  refreshBtn.addEventListener('click', renderFeed);
-  renderFeed();
+  // Share
+  els.feed.addEventListener('click', e=>{
+    const shareBtn = e.target.closest('.share');
+    if (!shareBtn) return;
+    const txt = decodeURIComponent(shareBtn.dataset.text);
+    const tag = shareBtn.dataset.tag;
+    if (navigator.share) {
+      navigator.share({title:`AnonyBox (${tag})`,text,url:location.href}).catch(()=>{});
+    } else {
+      navigator.clipboard.writeText(txt+'\n'+location.href).then(()=>alert('Copied!'));
+    }
+  });
+
+  els.sort.addEventListener('change',renderFeed);
+  els.filter.addEventListener('change',renderFeed);
+  els.refresh.addEventListener('click',renderFeed);
+
+  // Init
+  await syncLikes();
+  await renderFeed();
 });
 </script>
 </body>
